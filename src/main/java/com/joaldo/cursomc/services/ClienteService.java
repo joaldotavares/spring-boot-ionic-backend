@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.joaldo.cursomc.domain.Cliente;
 import com.joaldo.cursomc.dto.ClienteDTO;
 import com.joaldo.cursomc.repositories.ClienteRepository;
+import com.joaldo.cursomc.repositories.EnderecoRepository;
 import com.joaldo.cursomc.services.exceptions.DataIntegrityException;
 import com.joaldo.cursomc.services.exceptions.ObjectNotFoundException;
 
@@ -22,24 +23,27 @@ public class ClienteService {
 	@Autowired
 	private ClienteRepository repo;
 	
+	@Autowired
+	private EnderecoRepository enderecoRepository;
+	
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
 	
-
+	public Cliente insert(Cliente obj) {
+		obj.setId(null);
+		obj = repo.save(obj);
+		enderecoRepository.saveAll(obj.getEnderecos());
+		return obj;
+	}
+	
 	public Cliente update(Cliente obj) {
 		Cliente newObj = find(obj.getId());
 		updateData(newObj, obj);
 		return repo.save(newObj);
 	}
-
-	private void updateData(Cliente newObj, Cliente obj) {
-		newObj.setNome(obj.getNome());
-		newObj.setEmail(obj.getEmail());
-	}
-
 
 	public void delete(Integer id) {
 		find(id);
@@ -61,6 +65,11 @@ public class ClienteService {
 	
 	public Cliente fromDTO(ClienteDTO objDto) {
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
+	}
+	
+	private void updateData(Cliente newObj, Cliente obj) {
+		newObj.setNome(obj.getNome());
+		newObj.setEmail(obj.getEmail());
 	}
 	
 }
