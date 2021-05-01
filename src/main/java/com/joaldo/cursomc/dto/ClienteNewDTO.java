@@ -148,6 +148,4 @@ public class ClienteNewDTO implements Serializable{
 		this.cidadeId = cidadeId;
 	}
 	
-	
-	
 }
